@@ -113,6 +113,12 @@ local schema = {
             type = "boolean",
             default = false
         },
+        enc_id_token_in_authorization_header = {
+            description = "Whether the enc_id_token should be added in the Authorization " ..
+                    "header.",
+            type = "boolean",
+            default = false
+        },
         set_id_token_header = {
             description = "Whether the ID token should be added in the X-ID-Token header to " ..
                 "the request for downstream.",
@@ -410,6 +416,11 @@ function _M.rewrite(plugin_conf, ctx)
             -- Add X-Refresh-Token header, maybe.
             if session.data.refresh_token and conf.set_refresh_token_header then
                 core.request.set_header(ctx, "X-Refresh-Token", session.data.refresh_token)
+            end
+
+            -- Overwrite Authorization header with enc_id_token.
+            if session.data.enc_id_token and conf.enc_id_token_in_authorization_header then
+                core.request.set_header(ctx, "Authorization", "Bearer " .. session.data.enc_id_token)
             end
         end
     end
